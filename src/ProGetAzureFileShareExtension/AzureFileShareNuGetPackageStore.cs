@@ -21,14 +21,6 @@ namespace ProGetAzureFileShareExtension
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureFileShareNuGetPackageStore"/> class.
         /// </summary>
-        /// <param name="rootPath">The root file system directory of the package store.</param>
-        public AzureFileShareNuGetPackageStore(string rootPath)
-        {
-            this.RootPath = rootPath;
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AzureFileShareNuGetPackageStore"/> class.
-        /// </summary>
         protected AzureFileShareNuGetPackageStore()
         {
         }
