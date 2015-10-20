@@ -9,6 +9,7 @@ using Inedo.NuGet.Packages;
 using Inedo.ProGet.Data;
 using Inedo.ProGet.Extensibility;
 using Inedo.ProGet.Extensibility.PackageStores;
+using RedDog.Storage.Files;
 
 namespace ProGetAzureFileShareExtension
 {
@@ -28,7 +29,41 @@ namespace ProGetAzureFileShareExtension
         /// <summary>
         /// Gets the root file system directory of the package store.
         /// </summary>
+        [Persistent]
         public string RootPath { get; protected set; }
+
+        [Persistent]
+        public string DriveLetter { get; protected set; }
+
+        [Persistent]
+        public string FileShareName { get; protected set; }
+
+        [Persistent]
+        public string UserName { get; protected set; }
+
+        [Persistent]
+        public string AccessKey { get; protected set; }
+
+
+        private void InitPackageStore()
+        {
+            //todo: assert that DriveLetter is a single letter followed by a colon
+            //todo: assert that RootPath starts with DriveLetter
+            //todo: assert that UserName is not null
+            //todo: assert that AccessKey is not null, (and looks like a base64 encoded key?)
+
+            try
+            {
+                FilesMappedDrive.Mount(
+                    DriveLetter, @"\\" + UserName + @".file.core.windows.net\" + FileShareName,
+                    UserName, AccessKey);
+                this.LogDebug("drive mapping successful.");
+            }
+            catch (Exception ex)
+            {
+                this.LogError("Exception occurred mapping drive - " + ex);
+            }
+        }
 
         /// <summary>
         /// Returns a stream backed by the specified package if it exists; otherwise returns null.
@@ -43,6 +78,8 @@ namespace ProGetAzureFileShareExtension
                 throw new ArgumentNullException("packageId");
             if (packageVersion == null)
                 throw new ArgumentNullException("packageVersion");
+
+            InitPackageStore();
 
             var packagePath = Path.Combine(this.RootPath, packageId);
             if (!Directory.Exists(packagePath))
@@ -79,6 +116,8 @@ namespace ProGetAzureFileShareExtension
             if (packageVersion == null)
                 throw new ArgumentNullException("packageVersion");
 
+            InitPackageStore();
+
             var packagePath = Path.Combine(this.RootPath, packageId);
             Directory.CreateDirectory(packagePath);
 
@@ -98,6 +137,8 @@ namespace ProGetAzureFileShareExtension
                 throw new ArgumentNullException("packageId");
             if (packageVersion == null)
                 throw new ArgumentNullException("packageVersion");
+
+            InitPackageStore();
 
             var packagePath = Path.Combine(this.RootPath, packageId);
 
@@ -122,6 +163,8 @@ namespace ProGetAzureFileShareExtension
         {
             if (packageIndex == null)
                 throw new ArgumentNullException("packageIndex");
+
+            InitPackageStore();
 
             if (Directory.Exists(this.RootPath))
             {
