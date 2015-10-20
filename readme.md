@@ -18,3 +18,13 @@ This repo contains the source code for a [ProGet](http://inedo.com/proget) exten
   <Properties />
 </ProGetAzureFileShareExtension.AzureFileShareNuGetPackageStore>
 ```
+
+## Why does this extension exist?
+Azure File Shares are the closest thing to a SAN available on Azure. Unfortunately, they do not support domain account security - they have their own username and password (access key). This means that there is no transparent network access to the share.
+
+Microsoft recommends that you use mapped network drives, but as [various](http://blogs.msdn.com/b/windowsazurestorage/archive/2014/05/27/persisting-connections-to-microsoft-azure-files.aspx) [articles)](http://fabriccontroller.net/blog/posts/using-the-azure-file-service-in-your-cloud-services-web-roles-and-worker-role/) show, this doesn't work very well when running under a service account or IIS AppPool.
+
+Therefore, this extension attempts to reconnect the network share before use.
+
+## Useful information
+* [Extending ProGet Package Store Tutorial](http://inedo.com/support/tutorials/extending-proget-package-store)
