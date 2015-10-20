@@ -14,6 +14,7 @@ namespace Inedo.ProGet.Extensibility.PackageStores
     /// <summary>
     /// Default implementation of a NuGet package store.
     /// </summary>
+    [ProGetComponentProperties("DefaultNuGetPackageStore", "Copy of the default nuget package store")]
     public class DefaultNuGetPackageStore : NuGetPackageStoreBase
     {
         /// <summary>
