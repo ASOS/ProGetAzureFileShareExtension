@@ -195,7 +195,7 @@ namespace Inedo.ProGet.Extensibility.PackageStores
                         catch (Exception ex)
                         {
                             this.LogError("Could not validate {0}: {1}", fileName, ex.Message);
-                            StoredProcs.PackageIndexingErrors_LogIndexingError(
+                            StoredProcs.Packages_LogIndexingError(
                                 Feed_Id: this.FeedId,
                                 PackageFile_Name: localFileName,
                                 ErrorMessage_Text: ex.Message,
