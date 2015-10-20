@@ -262,5 +262,20 @@ namespace Inedo.ProGet.Extensibility.PackageStores
 
             return null;
         }
+
+        private void LogDebug(string message, params object[] args)
+        {
+            File.AppendAllText(@"c:\temp\proget-azure-fileshare-extension.log", string.Format(DateTime.Now + "::DEBUG::" + message + "\r\n", args));
+        }
+
+        private void LogWarning(string message, params object[] args)
+        {
+            File.AppendAllText(@"c:\temp\proget-azure-fileshare-extension.log", string.Format(DateTime.Now + "::WARN::" + message + "\r\n", args));
+        }
+
+        private void LogError(string message, params object[] args)
+        {
+            File.AppendAllText(@"c:\temp\proget-azure-fileshare-extension.log", string.Format(DateTime.Now + "::ERROR::" + message + "\r\n", args));
+        }
     }
 }
