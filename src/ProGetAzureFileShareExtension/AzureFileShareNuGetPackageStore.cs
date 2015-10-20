@@ -4,31 +4,32 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Inedo.Diagnostics;
 using Inedo.NuGet;
 using Inedo.NuGet.Packages;
 using Inedo.ProGet.Data;
+using Inedo.ProGet.Extensibility;
+using Inedo.ProGet.Extensibility.PackageStores;
 
-namespace Inedo.ProGet.Extensibility.PackageStores
+namespace ProGetAzureFileShareExtension
 {
     /// <summary>
     /// Default implementation of a NuGet package store.
     /// </summary>
-    [ProGetComponentProperties("DefaultNuGetPackageStore", "Copy of the default nuget package store")]
-    public class DefaultNuGetPackageStore : NuGetPackageStoreBase
+    [ProGetComponentProperties("AzureFileShareNuGetPackageStore", "Copy of the default nuget package store")]
+    public class AzureFileShareNuGetPackageStore : NuGetPackageStoreBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultNuGetPackageStore"/> class.
+        /// Initializes a new instance of the <see cref="AzureFileShareNuGetPackageStore"/> class.
         /// </summary>
         /// <param name="rootPath">The root file system directory of the package store.</param>
-        public DefaultNuGetPackageStore(string rootPath)
+        public AzureFileShareNuGetPackageStore(string rootPath)
         {
             this.RootPath = rootPath;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultNuGetPackageStore"/> class.
+        /// Initializes a new instance of the <see cref="AzureFileShareNuGetPackageStore"/> class.
         /// </summary>
-        protected DefaultNuGetPackageStore()
+        protected AzureFileShareNuGetPackageStore()
         {
         }
 
