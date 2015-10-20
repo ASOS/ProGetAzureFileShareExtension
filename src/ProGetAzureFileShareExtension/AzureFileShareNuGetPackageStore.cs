@@ -15,7 +15,7 @@ namespace ProGetAzureFileShareExtension
     /// <summary>
     /// Default implementation of a NuGet package store.
     /// </summary>
-    [ProGetComponentProperties("AzureFileShareNuGetPackageStore", "Copy of the default nuget package store")]
+    [ProGetComponentProperties("Azure File Storage Nuget Package Store", "Uses an azure file share for the nuget package store")]
     public class AzureFileShareNuGetPackageStore : NuGetPackageStoreBase
     {
         /// <summary>
