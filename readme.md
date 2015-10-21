@@ -20,7 +20,7 @@ This repo contains the source code for a [ProGet](http://inedo.com/proget) exten
               DriveLetter="P:"
               FileShareName="AzureFileShareName"
               UserName="StorageAccountName"
-              AccountKey="StorageAccountAccessKey"/>
+              AccessKey="StorageAccountAccessKey"/>
 </ProGetAzureFileShareExtension.AzureFileShareNuGetPackageStore>
 ```
 
