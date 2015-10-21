@@ -35,13 +35,13 @@ Therefore, this extension attempts to reconnect the network share before use. Ot
 * [Extending ProGet Package Store Tutorial](http://inedo.com/support/tutorials/extending-proget-package-store)
 
 ## todo
-[ ] Refactor
-[x] Add tests
-[ ] Add post build task to zip into progetx file
-[x] Add validation to InitPackageStore()
-[ ] Add proper logging framework
-[ ] Determine if its possible to inherit from DefaultNugetPackageStore, and call base methods (to insulate against changes)
-[x] Add missing xmldoc comments
-[x] Add log statements to useful spots
-[x] Move sln file to root
-[ ] Log timings around actions
+- [ ] Refactor
+- [x] Add tests
+- [ ] Add post build task to zip into progetx file
+- [x] Add validation to InitPackageStore()
+- [ ] Add proper logging framework
+- [ ] Determine if its possible to inherit from DefaultNugetPackageStore, and call base methods (to insulate against changes)
+- [x] Add missing xmldoc comments
+- [x] Add log statements to useful spots
+- [x] Move sln file to root
+- [ ] Log timings around actions
