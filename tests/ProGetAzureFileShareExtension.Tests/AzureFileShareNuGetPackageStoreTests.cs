@@ -19,6 +19,12 @@ namespace ProGetAzureFileShareExtension.Tests
         }
 
         [Test]
+        public void Can_instantiate_using_paramterless_constructor()
+        {
+            Assert.DoesNotThrow(() => new AzureFileShareNuGetPackageStore());
+        }
+
+        [Test]
         [TestCase(null, typeof(ArgumentNullException))]
         [TestCase("", typeof(ArgumentNullException))]
         [TestCase("P", typeof(ArgumentOutOfRangeException))]

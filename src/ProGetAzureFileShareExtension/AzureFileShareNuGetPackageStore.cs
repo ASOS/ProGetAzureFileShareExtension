@@ -10,7 +10,6 @@ using Inedo.NuGet.Packages;
 using Inedo.ProGet.Data;
 using Inedo.ProGet.Extensibility;
 using Inedo.ProGet.Extensibility.PackageStores;
-using RedDog.Storage.Files;
 
 namespace ProGetAzureFileShareExtension
 {
@@ -80,13 +79,13 @@ namespace ProGetAzureFileShareExtension
 
             try
             {
-                this.LogDebug("Mapping network share '{0}' to drive '{1}' with username '{2}'", uncPath, DriveLetter, UserName);
+                LogDebug("Mapping network share '{0}' to drive '{1}' with username '{2}'", uncPath, DriveLetter, UserName);
                 _fileShareMapper.Mount(DriveLetter, uncPath, UserName, AccessKey);
-                this.LogDebug("Drive mapping successful.");
+                LogDebug("Drive mapping successful.");
             }
             catch (Exception ex)
             {
-                this.LogError("Exception occurred mapping drive '{0}' to '{1}' with username '{2}': {3}", DriveLetter, uncPath, UserName, ex);
+                LogError("Exception occurred mapping drive '{0}' to '{1}' with username '{2}': {3}", DriveLetter, uncPath, UserName, ex);
                 throw;
             }
         }
@@ -109,7 +108,7 @@ namespace ProGetAzureFileShareExtension
 
             InitPackageStore();
 
-            var packagePath = Path.Combine(this.RootPath, packageId);
+            var packagePath = Path.Combine(RootPath, packageId);
             if (!_fileSystemOperations.DirectoryExists(packagePath))
             {
                 LogWarning("Attempted to open package '" + packageId + "', version '" + packageVersion + "', in folder '" + packagePath + "' but the folder didn't exist");
@@ -159,7 +158,7 @@ namespace ProGetAzureFileShareExtension
 
             try
             {
-                var packagePath = Path.Combine(this.RootPath, packageId);
+                var packagePath = Path.Combine(RootPath, packageId);
                 LogDebug("Creating package '{0}', version '{1}' in directory '{2}'", packageId, packageVersion, packagePath);
                 _fileSystemOperations.CreateDirectory(packagePath);
 
@@ -192,7 +191,7 @@ namespace ProGetAzureFileShareExtension
 
             InitPackageStore();
 
-            var packagePath = Path.Combine(this.RootPath, packageId);
+            var packagePath = Path.Combine(RootPath, packageId);
 
             if (_fileSystemOperations.DirectoryExists(packagePath))
             {
@@ -241,50 +240,50 @@ namespace ProGetAzureFileShareExtension
 
             InitPackageStore();
 
-            if (Directory.Exists(this.RootPath))
+            if (Directory.Exists(RootPath))
             {
-                this.LogDebug("Enumerating directories in {0}...", this.RootPath);
+                LogDebug("Enumerating directories in {0}...", RootPath);
 
                 IEnumerable<string> packageDirectories;
                 try
                 {
-                    packageDirectories = _fileSystemOperations.EnumerateDirectories(this.RootPath);
+                    packageDirectories = _fileSystemOperations.EnumerateDirectories(RootPath);
                 }
                 catch (Exception ex)
                 {
-                    this.LogError("Could not access RootPath '{0}'. Skipping feed cleanup. Error: {1}", this.RootPath, ex);
+                    LogError("Could not access RootPath '{0}'. Skipping feed cleanup. Error: {1}", RootPath, ex);
                     return;
                 }
 
                 foreach (var packageDirectory in packageDirectories)
                 {
-                    this.LogDebug("Enumerating all nupkg files in packageDirectory '{0}'", packageDirectory);
+                    LogDebug("Enumerating all nupkg files in packageDirectory '{0}'", packageDirectory);
 
                     bool any = false;
                     var packageFileNames = _fileSystemOperations.EnumerateFiles(packageDirectory, "*.nupkg");
                     foreach (var fileName in packageFileNames)
                     {
-                        this.LogDebug("Inspecting package '{0}'", fileName);
+                        LogDebug("Inspecting package '{0}'", fileName);
                         var localFileName = _fileSystemOperations.GetFileName(fileName);
 
                         any = true;
                         try
                         {
-                            using (var stream = this.TryOpenStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))
+                            using (var stream = TryOpenStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))
                             {
                                 if (stream != null)
                                 {
-                                    this.LogDebug("Validating {0}...", localFileName);
+                                    LogDebug("Validating {0}...", localFileName);
                                     if (packageIndex.ValidatePackage(stream))
                                     {
-                                        this.LogDebug("Verifying that {0} is the correct file name...", localFileName);
+                                        LogDebug("Verifying that {0} is the correct file name...", localFileName);
                                         stream.Position = 0;
                                         var package = NuGetPackage.ReadFromNupkgFile(stream);
                                         var expectedFileName = package.Id + "." + package.Version + ".nupkg";
                                         if (!string.Equals(localFileName, expectedFileName, StringComparison.OrdinalIgnoreCase))
                                         {
-                                            this.LogWarning("File {0} has incorrect name; should be {1}", localFileName, expectedFileName);
-                                            this.LogDebug("Renaming {0} to {1}...", localFileName, expectedFileName);
+                                            LogWarning("File {0} has incorrect name; should be {1}", localFileName, expectedFileName);
+                                            LogDebug("Renaming {0} to {1}...", localFileName, expectedFileName);
 
                                             var fullExpectedFileName = Path.Combine(packageDirectory, expectedFileName);
                                             if (File.Exists(fullExpectedFileName))
@@ -296,18 +295,18 @@ namespace ProGetAzureFileShareExtension
                                                 }
                                                 catch(Exception ex)
                                                 {
-                                                    LogError("Exception while deleting target file '" + fullExpectedFileName + "'");
+                                                    LogError("Exception while deleting target file '" + fullExpectedFileName + "': " + ex);
                                                 }
                                             }
                                             try
                                             {
-                                                this.LogDebug("Moving package from '{0}' to '{1}'.", fileName, fullExpectedFileName);
+                                                LogDebug("Moving package from '{0}' to '{1}'.", fileName, fullExpectedFileName);
                                                 _fileSystemOperations.MoveFile(fileName, fullExpectedFileName);
-                                                this.LogDebug("Package renamed.");
+                                                LogDebug("Package renamed.");
                                             }
                                             catch (Exception ex)
                                             {
-                                                this.LogError("Could not rename package: " + ex.Message);
+                                                LogError("Could not rename package: " + ex.Message);
                                             }
                                         }
                                     }
@@ -316,12 +315,8 @@ namespace ProGetAzureFileShareExtension
                         }
                         catch (Exception ex)
                         {
-                            this.LogError("Could not validate {0}: {1}", fileName, ex.Message);
-                            StoredProcs.Packages_LogIndexingError(
-                                Feed_Id: this.FeedId,
-                                PackageFile_Name: localFileName,
-                                ErrorMessage_Text: ex.Message,
-                                StackTrace_Bytes: Encoding.UTF8.GetBytes(ex.StackTrace ?? string.Empty)
+                            LogError("Could not validate {0}: {1}", fileName, ex.Message);
+                            StoredProcs.Packages_LogIndexingError(FeedId, localFileName, ex.Message, Encoding.UTF8.GetBytes(ex.StackTrace ?? string.Empty)
                             ).Execute();
                         }
                     }
@@ -330,12 +325,12 @@ namespace ProGetAzureFileShareExtension
                     {
                         try
                         {
-                            this.LogDebug("Deleting empty directory {0}...", packageDirectory);
+                            LogDebug("Deleting empty directory {0}...", packageDirectory);
                             _fileSystemOperations.DeleteDirectory(packageDirectory);
                         }
                         catch
                         {
-                            this.LogWarning("Directory could not be deleted; it may not be empty.");
+                            LogWarning("Directory could not be deleted; it may not be empty.");
                         }
                     }
                 }
@@ -344,14 +339,14 @@ namespace ProGetAzureFileShareExtension
             }
             else
             {
-                this.LogDebug("Package root path {0} not found. Nothing to do.", this.RootPath);
+                LogDebug("Package root path {0} not found. Nothing to do.", RootPath);
             }
         }
 
         private FileStream TryOpenStream(string fileName, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, int retryCount = 5)
         {
-            int currentAttempt = 0;
-            Exception lastException = null;
+            var currentAttempt = 0;
+            Exception lastException;
             do
             {
                 try
@@ -360,19 +355,19 @@ namespace ProGetAzureFileShareExtension
                 }
                 catch (FileNotFoundException ex)
                 {
-                    this.LogError("{0} not found. {1}", fileName, ex);
+                    LogError("{0} not found. {1}", fileName, ex);
                     return null;
                 }
                 catch (Exception ex)
                 {
                     lastException = ex;
-                    this.LogWarning("Unable to open file {0}: {1}", fileName, ex);
+                    LogWarning("Unable to open file {0}: {1}", fileName, ex);
                     currentAttempt++;
                 }
 
                 if (currentAttempt < retryCount)
                 {
-                    this.LogDebug("Failed to open file; will try again after 5 seconds...");
+                    LogDebug("Failed to open file; will try again after 5 seconds...");
                     Thread.Sleep(5000);
                 }
 
