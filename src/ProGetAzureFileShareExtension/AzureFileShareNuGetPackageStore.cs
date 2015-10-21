@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Inedo.NuGet;
 using Inedo.NuGet.Packages;
@@ -27,30 +28,39 @@ namespace ProGetAzureFileShareExtension
         }
 
         /// <summary>
-        /// Gets the root file system directory of the package store.
+        /// The root file system directory of the package store.
         /// </summary>
         [Persistent]
-        public string RootPath { get; protected set; }
+        public string RootPath { get; set; }
 
         [Persistent]
-        public string DriveLetter { get; protected set; }
+        public string DriveLetter { get; set; }
 
         [Persistent]
-        public string FileShareName { get; protected set; }
+        public string FileShareName { get; set; }
 
         [Persistent]
-        public string UserName { get; protected set; }
+        public string UserName { get; set; }
 
         [Persistent]
-        public string AccessKey { get; protected set; }
-
+        public string AccessKey { get; set; }
 
         private void InitPackageStore()
         {
-            //todo: assert that DriveLetter is a single letter followed by a colon
-            //todo: assert that RootPath starts with DriveLetter
-            //todo: assert that UserName is not null
-            //todo: assert that AccessKey is not null, (and looks like a base64 encoded key?)
+            if (string.IsNullOrWhiteSpace(DriveLetter))
+                throw new ArgumentNullException("DriveLetter");
+            if (!Regex.IsMatch(RootPath, "^[A-Za-z]:$"))
+                throw new ArgumentOutOfRangeException("DriveLetter", "DriveLetter must be a single drive letter (A-Z) followed by a colon");
+
+            if (string.IsNullOrWhiteSpace(RootPath))
+                throw new ArgumentNullException("RootPath");
+            if (!RootPath.ToLower().StartsWith(DriveLetter.ToLower()))
+                throw new ArgumentNullException("RootPath", "RootPath must be on the drive specified by DriveLetter (ie, if DriveLetter='P:', then RootPath must start with 'P:\'");
+
+            if (string.IsNullOrWhiteSpace(UserName))
+                throw new ArgumentNullException("UserName");
+            if (string.IsNullOrWhiteSpace(AccessKey))
+                throw new ArgumentNullException("AccessKey");
 
             try
             {
