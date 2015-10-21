@@ -12,7 +12,8 @@ This repo contains the source code for a [ProGet](http://inedo.com/proget) exten
 6. copy the file to the ProGet server(s) to thew new folder
 7. in ProGet -> Administration -> Advanced Settings, change `Core.ExtensionsPath` to `C:\ProgramData\ProGet\Extensions`
 8. restart IIS (or the service, if it is self hosted)
-9. in ProGet -> Administration -> Manage Feeds -> <feed> -> Package Store -> Change, paste the following
+9. ensure that the account that proget is running under has modify rights to %TEMP%
+10. in ProGet -> Administration -> Manage Feeds -> <feed> -> Package Store -> Change, paste the following
 ```
 <ProGetAzureFileShareExtension.AzureFileShareNuGetPackageStore Assembly="ProGetAzureFileShareExtension">
   <Properties RootPath="P:\PackageFolder"
