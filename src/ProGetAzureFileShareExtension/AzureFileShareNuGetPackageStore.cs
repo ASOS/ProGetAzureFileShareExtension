@@ -22,7 +22,7 @@ namespace ProGetAzureFileShareExtension
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureFileShareNuGetPackageStore"/> class.
         /// </summary>
-        protected AzureFileShareNuGetPackageStore()
+        public AzureFileShareNuGetPackageStore()
         {
         }
 
