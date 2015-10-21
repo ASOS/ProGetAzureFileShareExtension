@@ -15,7 +15,7 @@ This repo contains the source code for a [ProGet](http://inedo.com/proget) exten
 9. in ProGet -> Administration -> Manage Feeds -> <feed> -> Package Store -> Change, paste the following
 ```
 <ProGetAzureFileShareExtension.AzureFileShareNuGetPackageStore Assembly="ProGetAzureFileShareExtension">
-  <Properties RootPath="P:\PackageFolder
+  <Properties RootPath="P:\PackageFolder"
               DriveLetter="P:"
               FileShareName="AzureFileShareName"
               UserName="StorageAccountName"
