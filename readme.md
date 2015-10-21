@@ -40,7 +40,7 @@ Therefore, this extension attempts to reconnect the network share before use. Ot
 [x] Add validation to InitPackageStore()
 [ ] Add proper logging framework
 [ ] Determine if its possible to inherit from DefaultNugetPackageStore, and call base methods (to insulate against changes)
-[ ] Add missing xmldoc comments (or delete?)
+[x] Add missing xmldoc comments
 [x] Add log statements to useful spots
 [ ] Move sln file to root
 [ ] Log timings around actions

@@ -3,6 +3,9 @@ using System.IO;
 
 namespace ProGetAzureFileShareExtension
 {
+    /// <summary>
+    /// Interface to allow for unit testing
+    /// </summary>
     public interface IFileSystemOperations
     {
         bool DirectoryExists(string path);

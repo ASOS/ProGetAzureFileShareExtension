@@ -30,6 +30,11 @@ namespace ProGetAzureFileShareExtension
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AzureFileShareNuGetPackageStore"/> class. Used for unit testing
+        /// </summary>
+        /// <param name="fileShareMapper">An <see cref="IFileShareMapper"/> object to handle mapping of the file share</param>
+        /// <param name="fileSystemOperations">An <see cref="IFileSystemOperations"/> object to handle various file system objects</param>
         public AzureFileShareNuGetPackageStore(IFileShareMapper fileShareMapper, IFileSystemOperations fileSystemOperations)
         {
             _fileShareMapper = fileShareMapper;
@@ -39,21 +44,41 @@ namespace ProGetAzureFileShareExtension
         /// <summary>
         /// The root file system directory of the package store.
         /// </summary>
+        /// <example>P:\ProGetPackages</example>
         [Persistent]
         public string RootPath { get; set; }
 
+        /// <summary>
+        /// The drive letter to use to map to the file share
+        /// </summary>
+        /// <example>P:</example>
         [Persistent]
         public string DriveLetter { get; set; }
 
+        /// <summary>
+        /// The name of the share on the remote server
+        /// </summary>
+        /// <example>If the full unc is \\servername\sharename, it would be 'sharename'</example>
         [Persistent]
         public string FileShareName { get; set; }
 
+        /// <summary>
+        /// The username to use to connect to the share. For Azure File Shares, this is the storage account name.
+        /// </summary>
         [Persistent]
         public string UserName { get; set; }
 
+        /// <summary>
+        /// The password to use to connect to the share. For Azure File Shares, this is either the primary or secondary access key.
+        /// </summary>
         [Persistent]
         public string AccessKey { get; set; }
 
+        /// <summary>
+        /// Initialises the packages store by validating parameters, then connecting to the network share.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"> if <paramref name="DriveLetter"/> is null or contains only whitespace or <paramref name="RootPath"/> is null or contains only whitespace or <paramref name="UserName"/> is null or contains only whitespace or <paramref name="AccessKey"/> is null or contains only whitespace or <paramref name="FileShareName"/> is null or contains only whitespace.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"> if <paramref name="DriveLetter"/> does not match ^[A-Za-z]:$ or <paramref name="RootPath"/> does not start with <paramref name="DriveLetter"/></exception>
         private void InitPackageStore()
         {
             if (string.IsNullOrWhiteSpace(DriveLetter))
@@ -343,6 +368,15 @@ namespace ProGetAzureFileShareExtension
             }
         }
 
+        /// <summary>
+        /// Attempt to open the filestream, and if fails with any exception other than <see cref="FileNotFoundException" />, retry for <paramref name="retryCount"/> times, with a sleep of 5 seconds between each attempt.
+        /// </summary>
+        /// <param name="fileName">The full file path to open.</param>
+        /// <param name="fileMode"></param>
+        /// <param name="fileAccess"></param>
+        /// <param name="fileShare"></param>
+        /// <param name="retryCount"></param>
+        /// <returns>A valid file stream if it can. Null if the file does not exist, or re-throws the last exception if <paramref name="retryCount"/> attempts are exceeded.</returns>
         private FileStream TryOpenStream(string fileName, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, int retryCount = 5)
         {
             var currentAttempt = 0;
@@ -375,20 +409,38 @@ namespace ProGetAzureFileShareExtension
 
             if (lastException != null)
                 throw lastException;
-
+            
             return null;
         }
 
+        /// <summary>
+        /// Temporary logging function, as calling the ProGet SDK provided logging methods (ie, <see cref="Inedo.ProGet.Extensibility.LoggerExtensions.LogDebug(Inedo.ProGet.Extensibility.ILogger,string)"/> and friends) causes a Type Load exception.
+        /// This should be replaced by a real logging framework.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="args"></param>
         private void LogDebug(string message, params object[] args)
         {
             File.AppendAllText(@"c:\temp\proget-azure-fileshare-extension.log", string.Format(DateTime.Now + "::DEBUG::" + message + "\r\n", args));
         }
 
+        /// <summary>
+        /// Temporary logging function, as calling the ProGet SDK provided logging methods (ie, <see cref="Inedo.ProGet.Extensibility.LoggerExtensions.LogWarning(Inedo.ProGet.Extensibility.ILogger,string)"/> and friends) causes a Type Load exception.
+        /// This should be replaced by a real logging framework.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="args"></param>
         private void LogWarning(string message, params object[] args)
         {
             File.AppendAllText(@"c:\temp\proget-azure-fileshare-extension.log", string.Format(DateTime.Now + "::WARN::" + message + "\r\n", args));
         }
 
+        /// <summary>
+        /// Temporary logging function, as calling the ProGet SDK provided logging methods (ie, <see cref="Inedo.ProGet.Extensibility.LoggerExtensions.LogError(Inedo.ProGet.Extensibility.ILogger,string)"/> and friends) causes a Type Load exception.
+        /// This should be replaced by a real logging framework.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="args"></param>
         private void LogError(string message, params object[] args)
         {
             File.AppendAllText(@"c:\temp\proget-azure-fileshare-extension.log", string.Format(DateTime.Now + "::ERROR::" + message + "\r\n", args));
