@@ -61,6 +61,8 @@ namespace ProGetAzureFileShareExtension
                 throw new ArgumentNullException("UserName");
             if (string.IsNullOrWhiteSpace(AccessKey))
                 throw new ArgumentNullException("AccessKey");
+            if (string.IsNullOrWhiteSpace(FileShareName))
+                throw new ArgumentNullException("FileShareName");
 
             var uncPath = string.Format(@"\\{0}.file.core.windows.net\{1}", UserName, FileShareName);
 
