@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProGetAzureFileShareExtension", "ProGetAzureFileShareExtension.csproj", "{E8D245A5-A58B-43DB-9E18-5B1950420CC2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProGetAzureFileShareExtension", "src\ProGetAzureFileShareExtension\ProGetAzureFileShareExtension.csproj", "{E8D245A5-A58B-43DB-9E18-5B1950420CC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProGetAzureFileShareExtension.Tests", "..\..\tests\ProGetAzureFileShareExtension.Tests\ProGetAzureFileShareExtension.Tests.csproj", "{3AE7C9D8-D32B-4F9C-9B32-2D77097EBAC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProGetAzureFileShareExtension.Tests", "tests\ProGetAzureFileShareExtension.Tests\ProGetAzureFileShareExtension.Tests.csproj", "{3AE7C9D8-D32B-4F9C-9B32-2D77097EBAC8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
