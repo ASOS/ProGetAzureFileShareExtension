@@ -20,11 +20,21 @@ namespace ProGetAzureFileShareExtension
     [ProGetComponentProperties("Azure File Storage Nuget Package Store", "Uses an azure file share for the nuget package store")]
     public class AzureFileShareNuGetPackageStore : NuGetPackageStoreBase
     {
+        private readonly IFileShareMapper _fileShareMapper;
+        private readonly IFileSystemOperations _fileSystemOperations;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureFileShareNuGetPackageStore"/> class.
         /// </summary>
         public AzureFileShareNuGetPackageStore()
+            : this(new FileShareMapper(), new FileSystemOperations())
         {
+        }
+
+        public AzureFileShareNuGetPackageStore(IFileShareMapper fileShareMapper, IFileSystemOperations fileSystemOperations)
+        {
+            _fileShareMapper = fileShareMapper;
+            _fileSystemOperations = fileSystemOperations;
         }
 
         /// <summary>
@@ -49,18 +59,20 @@ namespace ProGetAzureFileShareExtension
         {
             if (string.IsNullOrWhiteSpace(DriveLetter))
                 throw new ArgumentNullException("DriveLetter");
-            if (!Regex.IsMatch(RootPath, "^[A-Za-z]:$"))
+            if (!Regex.IsMatch(DriveLetter, "^[A-Za-z]:$"))
                 throw new ArgumentOutOfRangeException("DriveLetter", "DriveLetter must be a single drive letter (A-Z) followed by a colon");
 
             if (string.IsNullOrWhiteSpace(RootPath))
                 throw new ArgumentNullException("RootPath");
             if (!RootPath.ToLower().StartsWith(DriveLetter.ToLower()))
-                throw new ArgumentNullException("RootPath", "RootPath must be on the drive specified by DriveLetter (ie, if DriveLetter='P:', then RootPath must start with 'P:\'");
+                throw new ArgumentOutOfRangeException("RootPath", "RootPath must be on the drive specified by DriveLetter (ie, if DriveLetter='P:', then RootPath must start with 'P:\'");
 
             if (string.IsNullOrWhiteSpace(UserName))
                 throw new ArgumentNullException("UserName");
+
             if (string.IsNullOrWhiteSpace(AccessKey))
                 throw new ArgumentNullException("AccessKey");
+
             if (string.IsNullOrWhiteSpace(FileShareName))
                 throw new ArgumentNullException("FileShareName");
 
@@ -69,7 +81,7 @@ namespace ProGetAzureFileShareExtension
             try
             {
                 this.LogDebug("Mapping network share '{0}' to drive '{1}' with username '{2}'", uncPath, DriveLetter, UserName);
-                FilesMappedDrive.Mount(DriveLetter, uncPath, UserName, AccessKey);
+                _fileShareMapper.Mount(DriveLetter, uncPath, UserName, AccessKey);
                 this.LogDebug("Drive mapping successful.");
             }
             catch (Exception ex)
@@ -98,14 +110,14 @@ namespace ProGetAzureFileShareExtension
             InitPackageStore();
 
             var packagePath = Path.Combine(this.RootPath, packageId);
-            if (!Directory.Exists(packagePath))
+            if (!_fileSystemOperations.DirectoryExists(packagePath))
             {
                 LogWarning("Attempted to open package '" + packageId + "', version '" + packageVersion + "', in folder '" + packagePath + "' but the folder didn't exist");
                 return null;
             }
 
             var versionPath = Path.Combine(packagePath, packageId + "." + packageVersion + ".nupkg");
-            if (!File.Exists(versionPath))
+            if (!_fileSystemOperations.FileExists(versionPath))
             {
                 LogWarning("Attempted to open package '" + packageId + "', version '" + packageVersion + "', at path '" + versionPath + "' but it didn't exist");
                 return null;
@@ -113,7 +125,7 @@ namespace ProGetAzureFileShareExtension
 
             try
             {
-                return new FileStream(versionPath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
+                return _fileSystemOperations.GetFileStream(versionPath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
             }
             catch (FileNotFoundException ex)
             {
@@ -149,12 +161,12 @@ namespace ProGetAzureFileShareExtension
             {
                 var packagePath = Path.Combine(this.RootPath, packageId);
                 LogDebug("Creating package '{0}', version '{1}' in directory '{2}'", packageId, packageVersion, packagePath);
-                Directory.CreateDirectory(packagePath);
+                _fileSystemOperations.CreateDirectory(packagePath);
 
                 var versionPath = Path.Combine(packagePath, packageId + "." + packageVersion + ".nupkg");
                 LogDebug("Creating package '{0}', version '{1}' at '{2}'", packageId, packageVersion, versionPath);
 
-                return new FileStream(versionPath, FileMode.Create, FileAccess.Write, FileShare.Delete);
+                return _fileSystemOperations.GetFileStream(versionPath, FileMode.Create, FileAccess.Write, FileShare.Delete);
             }
             catch (Exception ex)
             {
@@ -182,13 +194,13 @@ namespace ProGetAzureFileShareExtension
 
             var packagePath = Path.Combine(this.RootPath, packageId);
 
-            if (Directory.Exists(packagePath))
+            if (_fileSystemOperations.DirectoryExists(packagePath))
             {
                 var versionPath = Path.Combine(packagePath, packageId + "." + packageVersion + ".nupkg");
                 LogDebug("Deleting file '" + versionPath + "'.");
                 try
                 {
-                    File.Delete(versionPath);
+                    _fileSystemOperations.DeleteFile(versionPath);
                 }
                 catch (Exception ex)
                 {
@@ -196,12 +208,12 @@ namespace ProGetAzureFileShareExtension
                     throw;
                 }
 
-                if (!Directory.EnumerateFileSystemEntries(packagePath).Any())
+                if (!_fileSystemOperations.EnumerateFileSystemEntries(packagePath).Any())
                 {
                     LogDebug("Deleting folder '" + packagePath + "'.");
                     try
                     {
-                        Directory.Delete(packagePath);
+                        _fileSystemOperations.DeleteDirectory(packagePath);
                     }
                     catch (Exception ex)
                     {
@@ -236,7 +248,7 @@ namespace ProGetAzureFileShareExtension
                 IEnumerable<string> packageDirectories;
                 try
                 {
-                    packageDirectories = Directory.EnumerateDirectories(this.RootPath);
+                    packageDirectories = _fileSystemOperations.EnumerateDirectories(this.RootPath);
                 }
                 catch (Exception ex)
                 {
@@ -249,11 +261,11 @@ namespace ProGetAzureFileShareExtension
                     this.LogDebug("Enumerating all nupkg files in packageDirectory '{0}'", packageDirectory);
 
                     bool any = false;
-                    var packageFileNames = Directory.EnumerateFiles(packageDirectory, "*.nupkg");
+                    var packageFileNames = _fileSystemOperations.EnumerateFiles(packageDirectory, "*.nupkg");
                     foreach (var fileName in packageFileNames)
                     {
                         this.LogDebug("Inspecting package '{0}'", fileName);
-                        var localFileName = Path.GetFileName(fileName);
+                        var localFileName = _fileSystemOperations.GetFileName(fileName);
 
                         any = true;
                         try
@@ -280,7 +292,7 @@ namespace ProGetAzureFileShareExtension
                                                 try
                                                 {
                                                     LogDebug("Deleting target file '" + fullExpectedFileName + "'");
-                                                    File.Delete(fullExpectedFileName);
+                                                    _fileSystemOperations.DeleteFile(fullExpectedFileName);
                                                 }
                                                 catch(Exception ex)
                                                 {
@@ -290,7 +302,7 @@ namespace ProGetAzureFileShareExtension
                                             try
                                             {
                                                 this.LogDebug("Moving package from '{0}' to '{1}'.", fileName, fullExpectedFileName);
-                                                File.Move(fileName, fullExpectedFileName);
+                                                _fileSystemOperations.MoveFile(fileName, fullExpectedFileName);
                                                 this.LogDebug("Package renamed.");
                                             }
                                             catch (Exception ex)
@@ -319,7 +331,7 @@ namespace ProGetAzureFileShareExtension
                         try
                         {
                             this.LogDebug("Deleting empty directory {0}...", packageDirectory);
-                            Directory.Delete(packageDirectory);
+                            _fileSystemOperations.DeleteDirectory(packageDirectory);
                         }
                         catch
                         {
@@ -344,7 +356,7 @@ namespace ProGetAzureFileShareExtension
             {
                 try
                 {
-                    return new FileStream(fileName, fileMode, fileAccess, fileShare);
+                    return (FileStream)_fileSystemOperations.GetFileStream(fileName, fileMode, fileAccess, fileShare);
                 }
                 catch (FileNotFoundException ex)
                 {

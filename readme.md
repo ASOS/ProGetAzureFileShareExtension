@@ -35,7 +35,7 @@ Therefore, this extension attempts to reconnect the network share before use. Ot
 
 ## todo
 [ ] Refactor
-[ ] Add tests
+[x] Add tests
 [ ] Add post build task to zip into progetx file
 [x] Add validation to InitPackageStore()
 [ ] Add proper logging framework

@@ -88,6 +88,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AzureFileShareNuGetPackageStore.cs" />
+    <Compile Include="FileShareMapper.cs" />
+    <Compile Include="FileSystemOperations.cs" />
+    <Compile Include="IFileShareMapper.cs" />
+    <Compile Include="IFileSystemOperations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
