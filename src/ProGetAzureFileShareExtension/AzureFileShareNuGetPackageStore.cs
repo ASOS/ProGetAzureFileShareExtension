@@ -73,6 +73,7 @@ namespace ProGetAzureFileShareExtension
             catch (Exception ex)
             {
                 this.LogError("Exception occurred mapping drive '{0}' to '{1}' with username '{2}': {3}", DriveLetter, uncPath, UserName, ex);
+                throw;
             }
         }
 
