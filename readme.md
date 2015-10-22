@@ -37,7 +37,7 @@ Therefore, this extension attempts to reconnect the network share before use. Ot
 ## todo
 - [ ] Refactor
 - [x] Add tests
-- [ ] Add post build task to zip into progetx file
+- [x] Add post build task to zip into progetx file
 - [x] Add validation to InitPackageStore()
 - [ ] Add proper logging framework
 - [ ] Determine if its possible to inherit from DefaultNugetPackageStore, and call base methods (to insulate against changes)

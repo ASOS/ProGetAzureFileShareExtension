@@ -102,7 +102,22 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
   -->
+
+  <Import Project="..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets" Condition="Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')"/>
+  <Target Name="AfterBuild">
+    <Message Text="Creating output package $(OutDir)\ProGetAzureFileShareExtension.progetx" />
+
+    <CreateItem Include="$(OutDir)\ProGetAzureFileShareExtension.dll;$(OutDir)\RedDog.Storage.dll;" >
+      <Output ItemName="ZipFiles" TaskParameter="Include"/>
+    </CreateItem>
+
+    <Error Text="Unable to create extension package - please ensure nuget packages are available (looking for existance of '..\..\packages\MSBuildTasks.1.4.0.88')."
+           Condition="!Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')"/>
+
+    <Zip ZipFileName="$(OutDir)\ProGetAzureFileShareExtension.progetx"
+        WorkingDirectory="$(OutDir)"
+        Files="@(ZipFiles)"
+        Condition="Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')"/>
+  </Target>
 </Project>
