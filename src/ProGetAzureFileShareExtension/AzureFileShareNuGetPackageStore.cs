@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -90,6 +91,7 @@ namespace ProGetAzureFileShareExtension
         private void InitPackageStore()
         {
             _logger = Logger.Initialise(LogFileName);
+            _fileSystemOperations.Logger = _logger;
 
             if (string.IsNullOrWhiteSpace(DriveLetter))
                 throw new ArgumentNullException("DriveLetter");
@@ -115,8 +117,11 @@ namespace ProGetAzureFileShareExtension
             try
             {
                 _logger.DebugFormat("Mapping network share '{0}' to drive '{1}' with username '{2}'", uncPath, DriveLetter, UserName);
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
                 _fileShareMapper.Mount(DriveLetter, uncPath, UserName, AccessKey);
-                _logger.Debug("Drive mapping successful.");
+                stopWatch.Stop();
+                _logger.DebugFormat("Drive mapping successful and took {0} milliseconds.", stopWatch.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
@@ -225,7 +230,6 @@ namespace ProGetAzureFileShareExtension
             InitPackageStore();
 
             _logger.Debug("DeletePackage('" + packageId + "', '" + packageVersion + "') called");
-
 
             var packagePath = Path.Combine(RootPath, packageId);
 

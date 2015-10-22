@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using log4net;
 
 namespace ProGetAzureFileShareExtension
 {
@@ -19,5 +20,6 @@ namespace ProGetAzureFileShareExtension
         IEnumerable<string> EnumerateFiles(string path, string searchPattern);
         string GetFileName(string path);
         IEnumerable<string> EnumerateFileSystemEntries(string path);
+        ILog Logger { set; }
     }
 }

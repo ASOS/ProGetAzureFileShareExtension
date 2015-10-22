@@ -47,4 +47,4 @@ Therefore, this extension attempts to reconnect the network share before use. Ot
 - [x] Add missing xmldoc comments
 - [x] Add log statements to useful spots
 - [x] Move sln file to root
-- [ ] Log timings around actions
+- [x] Log timings around actions
