@@ -280,7 +280,7 @@ namespace ProGetAzureFileShareExtension
 
             _logger.Debug("Clean('" + packageIndex + "') called");
 
-            if (Directory.Exists(RootPath))
+            if (_fileSystemOperations.DirectoryExists(RootPath))
             {
                 _logger.DebugFormat("Enumerating directories in {0}...", RootPath);
 
