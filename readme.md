@@ -20,9 +20,12 @@ This repo contains the source code for a [ProGet](http://inedo.com/proget) exten
               DriveLetter="P:"
               FileShareName="AzureFileShareName"
               UserName="StorageAccountName"
-              AccessKey="StorageAccountAccessKey"/>
+              AccessKey="StorageAccountAccessKey"
+              LogFileName="c:\temp\somelogfilepath.log" />
 </ProGetAzureFileShareExtension.AzureFileShareNuGetPackageStore>
 ```
+*Note* `LogFileName` is optional. If not provided, logging is disabled.
+
 
 ## Why does this extension exist?
 Azure File Shares are the closest thing to a SAN available on Azure. Unfortunately, they do not support domain account security - they have their own username and password (access key). This means that there is no transparent network access to the share.
@@ -39,7 +42,7 @@ Therefore, this extension attempts to reconnect the network share before use. Ot
 - [x] Add tests
 - [x] Add post build task to zip into progetx file
 - [x] Add validation to InitPackageStore()
-- [ ] Add proper logging framework
+- [x] Add proper logging framework
 - [ ] Determine if its possible to inherit from DefaultNugetPackageStore, and call base methods (to insulate against changes)
 - [x] Add missing xmldoc comments
 - [x] Add log statements to useful spots

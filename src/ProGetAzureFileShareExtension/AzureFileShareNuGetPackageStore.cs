@@ -10,6 +10,7 @@ using Inedo.NuGet.Packages;
 using Inedo.ProGet.Data;
 using Inedo.ProGet.Extensibility;
 using Inedo.ProGet.Extensibility.PackageStores;
+using log4net;
 
 namespace ProGetAzureFileShareExtension
 {
@@ -21,6 +22,7 @@ namespace ProGetAzureFileShareExtension
     {
         private readonly IFileShareMapper _fileShareMapper;
         private readonly IFileSystemOperations _fileSystemOperations;
+        private ILog _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureFileShareNuGetPackageStore"/> class.
@@ -75,12 +77,20 @@ namespace ProGetAzureFileShareExtension
         public string AccessKey { get; set; }
 
         /// <summary>
+        /// The log file to use for logging. If not supplied, logging is disabled.
+        /// </summary>
+        [Persistent]
+        public string LogFileName { get; set; }
+
+        /// <summary>
         /// Initialises the packages store by validating parameters, then connecting to the network share.
         /// </summary>
         /// <exception cref="ArgumentNullException"> if <paramref name="DriveLetter"/> is null or contains only whitespace or <paramref name="RootPath"/> is null or contains only whitespace or <paramref name="UserName"/> is null or contains only whitespace or <paramref name="AccessKey"/> is null or contains only whitespace or <paramref name="FileShareName"/> is null or contains only whitespace.</exception>
         /// <exception cref="ArgumentOutOfRangeException"> if <paramref name="DriveLetter"/> does not match ^[A-Za-z]:$ or <paramref name="RootPath"/> does not start with <paramref name="DriveLetter"/></exception>
         private void InitPackageStore()
         {
+            _logger = Logger.Initialise(LogFileName);
+
             if (string.IsNullOrWhiteSpace(DriveLetter))
                 throw new ArgumentNullException("DriveLetter");
             if (!Regex.IsMatch(DriveLetter, "^[A-Za-z]:$"))
@@ -104,13 +114,13 @@ namespace ProGetAzureFileShareExtension
 
             try
             {
-                LogDebug("Mapping network share '{0}' to drive '{1}' with username '{2}'", uncPath, DriveLetter, UserName);
+                _logger.DebugFormat("Mapping network share '{0}' to drive '{1}' with username '{2}'", uncPath, DriveLetter, UserName);
                 _fileShareMapper.Mount(DriveLetter, uncPath, UserName, AccessKey);
-                LogDebug("Drive mapping successful.");
+                _logger.Debug("Drive mapping successful.");
             }
             catch (Exception ex)
             {
-                LogError("Exception occurred mapping drive '{0}' to '{1}' with username '{2}': {3}", DriveLetter, uncPath, UserName, ex);
+                _logger.Error(String.Format("Exception occurred mapping drive '{0}' to '{1}' with username '{2}': {3}", DriveLetter, uncPath, UserName), ex);
                 throw;
             }
         }
@@ -124,8 +134,6 @@ namespace ProGetAzureFileShareExtension
         /// <exception cref="ArgumentNullException"><paramref name="packageId"/> is null or contains only whitespace or <paramref name="packageVersion"/> is null.</exception>
         public override Stream OpenPackage(string packageId, SemanticVersion packageVersion)
         {
-            LogDebug("OpenPackage('" + packageId + "', '" + packageVersion + "') called");
-
             if (string.IsNullOrWhiteSpace(packageId))
                 throw new ArgumentNullException("packageId");
             if (packageVersion == null)
@@ -133,17 +141,19 @@ namespace ProGetAzureFileShareExtension
 
             InitPackageStore();
 
+            _logger.Debug("OpenPackage('" + packageId + "', '" + packageVersion + "') called");
+
             var packagePath = Path.Combine(RootPath, packageId);
             if (!_fileSystemOperations.DirectoryExists(packagePath))
             {
-                LogWarning("Attempted to open package '" + packageId + "', version '" + packageVersion + "', in folder '" + packagePath + "' but the folder didn't exist");
+                _logger.Warn("Attempted to open package '" + packageId + "', version '" + packageVersion + "', in folder '" + packagePath + "' but the folder didn't exist");
                 return null;
             }
 
             var versionPath = Path.Combine(packagePath, packageId + "." + packageVersion + ".nupkg");
             if (!_fileSystemOperations.FileExists(versionPath))
             {
-                LogWarning("Attempted to open package '" + packageId + "', version '" + packageVersion + "', at path '" + versionPath + "' but it didn't exist");
+                _logger.Warn("Attempted to open package '" + packageId + "', version '" + packageVersion + "', at path '" + versionPath + "' but it didn't exist");
                 return null;
             }
 
@@ -153,12 +163,12 @@ namespace ProGetAzureFileShareExtension
             }
             catch (FileNotFoundException ex)
             {
-                LogError("File not found error looking for package '" + packageId + "', version '" + packageVersion + "'." + ex);
+                _logger.Error("File not found error looking for package '" + packageId + "', version '" + packageVersion + "'." + ex);
                 return null;
             }
             catch (DirectoryNotFoundException ex)
             {
-                LogError("Directory not found error looking for package '" + packageId + "', version '" + packageVersion + "'." + ex);
+                _logger.Error("Directory not found error looking for package '" + packageId + "', version '" + packageVersion + "'." + ex);
                 return null;
             }
         }
@@ -172,8 +182,6 @@ namespace ProGetAzureFileShareExtension
         /// <exception cref="ArgumentNullException"><paramref name="packageId"/> is null or contains only whitespace or <paramref name="packageVersion"/> is null.</exception>
         public override Stream CreatePackage(string packageId, SemanticVersion packageVersion)
         {
-            LogDebug("CreatePackage('" + packageId + "', '" + packageVersion + "') called");
-
             if (string.IsNullOrWhiteSpace(packageId))
                 throw new ArgumentNullException("packageId");
             if (packageVersion == null)
@@ -181,20 +189,22 @@ namespace ProGetAzureFileShareExtension
 
             InitPackageStore();
 
+            _logger.Debug("CreatePackage('" + packageId + "', '" + packageVersion + "') called");
+
             try
             {
                 var packagePath = Path.Combine(RootPath, packageId);
-                LogDebug("Creating package '{0}', version '{1}' in directory '{2}'", packageId, packageVersion, packagePath);
+                _logger.DebugFormat("Creating package '{0}', version '{1}' in directory '{2}'", packageId, packageVersion, packagePath);
                 _fileSystemOperations.CreateDirectory(packagePath);
 
                 var versionPath = Path.Combine(packagePath, packageId + "." + packageVersion + ".nupkg");
-                LogDebug("Creating package '{0}', version '{1}' at '{2}'", packageId, packageVersion, versionPath);
+                _logger.DebugFormat("Creating package '{0}', version '{1}' at '{2}'", packageId, packageVersion, versionPath);
 
                 return _fileSystemOperations.GetFileStream(versionPath, FileMode.Create, FileAccess.Write, FileShare.Delete);
             }
             catch (Exception ex)
             {
-                LogError("Error creating package '{0}', version '{1}': {2}", packageId, packageVersion, ex);
+                _logger.Error(String.Format("Error creating package '{0}', version '{1}': {2}", packageId, packageVersion), ex);
                 throw;
             }
         }
@@ -207,8 +217,6 @@ namespace ProGetAzureFileShareExtension
         /// <exception cref="ArgumentNullException"><paramref name="packageId"/> is null or contains only whitespace or <paramref name="packageVersion"/> is null.</exception>
         public override void DeletePackage(string packageId, SemanticVersion packageVersion)
         {
-            LogDebug("DeletePackage('" + packageId + "', '" + packageVersion + "') called");
-
             if (string.IsNullOrWhiteSpace(packageId))
                 throw new ArgumentNullException("packageId");
             if (packageVersion == null)
@@ -216,38 +224,41 @@ namespace ProGetAzureFileShareExtension
 
             InitPackageStore();
 
+            _logger.Debug("DeletePackage('" + packageId + "', '" + packageVersion + "') called");
+
+
             var packagePath = Path.Combine(RootPath, packageId);
 
             if (_fileSystemOperations.DirectoryExists(packagePath))
             {
                 var versionPath = Path.Combine(packagePath, packageId + "." + packageVersion + ".nupkg");
-                LogDebug("Deleting file '" + versionPath + "'.");
+                _logger.Debug("Deleting file '" + versionPath + "'.");
                 try
                 {
                     _fileSystemOperations.DeleteFile(versionPath);
                 }
                 catch (Exception ex)
                 {
-                    LogError("Error deleting package '{0}', version '{1}': {2}", packageId, packageVersion, ex);
+                    _logger.Error(string.Format("Error deleting package '{0}', version '{1}'", packageId, packageVersion), ex);
                     throw;
                 }
 
                 if (!_fileSystemOperations.EnumerateFileSystemEntries(packagePath).Any())
                 {
-                    LogDebug("Deleting folder '" + packagePath + "'.");
+                    _logger.Debug("Deleting folder '" + packagePath + "'.");
                     try
                     {
                         _fileSystemOperations.DeleteDirectory(packagePath);
                     }
                     catch (Exception ex)
                     {
-                        LogWarning("Exception while attemptnig to delete folder '{0}': {1}", packagePath, ex);
+                        _logger.Warn(string.Format("Exception while attemptnig to delete folder '{0}')", packagePath), ex);
                     }
                 }
             }
             else
             {
-                LogWarning("Attempted to delete pacakage ('{0}', '{1}') that didn't exist ", packageId, packageVersion);
+                _logger.WarnFormat("Attempted to delete pacakage ('{0}', '{1}') that didn't exist ", packageId, packageVersion);
             }
         }
 
@@ -258,16 +269,16 @@ namespace ProGetAzureFileShareExtension
         /// <exception cref="ArgumentNullException"><paramref name="packageIndex"/> is null.</exception>
         public override void Clean(IPackageIndex packageIndex)
         {
-            LogDebug("Clean('" + packageIndex + "') called");
-
             if (packageIndex == null)
                 throw new ArgumentNullException("packageIndex");
 
             InitPackageStore();
 
+            _logger.Debug("Clean('" + packageIndex + "') called");
+
             if (Directory.Exists(RootPath))
             {
-                LogDebug("Enumerating directories in {0}...", RootPath);
+                _logger.DebugFormat("Enumerating directories in {0}...", RootPath);
 
                 IEnumerable<string> packageDirectories;
                 try
@@ -276,19 +287,19 @@ namespace ProGetAzureFileShareExtension
                 }
                 catch (Exception ex)
                 {
-                    LogError("Could not access RootPath '{0}'. Skipping feed cleanup. Error: {1}", RootPath, ex);
+                    _logger.Error(string.Format("Could not access RootPath '{0}'. Skipping feed cleanup.", RootPath), ex);
                     return;
                 }
 
                 foreach (var packageDirectory in packageDirectories)
                 {
-                    LogDebug("Enumerating all nupkg files in packageDirectory '{0}'", packageDirectory);
+                    _logger.DebugFormat("Enumerating all nupkg files in packageDirectory '{0}'", packageDirectory);
 
                     bool any = false;
                     var packageFileNames = _fileSystemOperations.EnumerateFiles(packageDirectory, "*.nupkg");
                     foreach (var fileName in packageFileNames)
                     {
-                        LogDebug("Inspecting package '{0}'", fileName);
+                        _logger.DebugFormat("Inspecting package '{0}'", fileName);
                         var localFileName = _fileSystemOperations.GetFileName(fileName);
 
                         any = true;
@@ -298,40 +309,40 @@ namespace ProGetAzureFileShareExtension
                             {
                                 if (stream != null)
                                 {
-                                    LogDebug("Validating {0}...", localFileName);
+                                    _logger.DebugFormat("Validating {0}...", localFileName);
                                     if (packageIndex.ValidatePackage(stream))
                                     {
-                                        LogDebug("Verifying that {0} is the correct file name...", localFileName);
+                                        _logger.DebugFormat("Verifying that {0} is the correct file name...", localFileName);
                                         stream.Position = 0;
                                         var package = NuGetPackage.ReadFromNupkgFile(stream);
                                         var expectedFileName = package.Id + "." + package.Version + ".nupkg";
                                         if (!string.Equals(localFileName, expectedFileName, StringComparison.OrdinalIgnoreCase))
                                         {
-                                            LogWarning("File {0} has incorrect name; should be {1}", localFileName, expectedFileName);
-                                            LogDebug("Renaming {0} to {1}...", localFileName, expectedFileName);
+                                            _logger.WarnFormat("File {0} has incorrect name; should be {1}", localFileName, expectedFileName);
+                                            _logger.DebugFormat("Renaming {0} to {1}...", localFileName, expectedFileName);
 
                                             var fullExpectedFileName = Path.Combine(packageDirectory, expectedFileName);
                                             if (File.Exists(fullExpectedFileName))
                                             {
                                                 try
                                                 {
-                                                    LogDebug("Deleting target file '" + fullExpectedFileName + "'");
+                                                    _logger.Debug("Deleting target file '" + fullExpectedFileName + "'");
                                                     _fileSystemOperations.DeleteFile(fullExpectedFileName);
                                                 }
                                                 catch(Exception ex)
                                                 {
-                                                    LogError("Exception while deleting target file '" + fullExpectedFileName + "': " + ex);
+                                                    _logger.Error("Exception while deleting target file '" + fullExpectedFileName + "': " + ex);
                                                 }
                                             }
                                             try
                                             {
-                                                LogDebug("Moving package from '{0}' to '{1}'.", fileName, fullExpectedFileName);
+                                                _logger.DebugFormat("Moving package from '{0}' to '{1}'.", fileName, fullExpectedFileName);
                                                 _fileSystemOperations.MoveFile(fileName, fullExpectedFileName);
-                                                LogDebug("Package renamed.");
+                                                _logger.Debug("Package renamed.");
                                             }
                                             catch (Exception ex)
                                             {
-                                                LogError("Could not rename package: " + ex.Message);
+                                                _logger.Error("Could not rename package: ", ex);
                                             }
                                         }
                                     }
@@ -340,7 +351,7 @@ namespace ProGetAzureFileShareExtension
                         }
                         catch (Exception ex)
                         {
-                            LogError("Could not validate {0}: {1}", fileName, ex.Message);
+                            _logger.Error(string.Format("Could not validate '{0}'", fileName), ex);
                             StoredProcs.Packages_LogIndexingError(FeedId, localFileName, ex.Message, Encoding.UTF8.GetBytes(ex.StackTrace ?? string.Empty)
                             ).Execute();
                         }
@@ -350,12 +361,12 @@ namespace ProGetAzureFileShareExtension
                     {
                         try
                         {
-                            LogDebug("Deleting empty directory {0}...", packageDirectory);
+                            _logger.DebugFormat("Deleting empty directory {0}...", packageDirectory);
                             _fileSystemOperations.DeleteDirectory(packageDirectory);
                         }
                         catch
                         {
-                            LogWarning("Directory could not be deleted; it may not be empty.");
+                            _logger.Warn("Directory could not be deleted; it may not be empty.");
                         }
                     }
                 }
@@ -364,7 +375,7 @@ namespace ProGetAzureFileShareExtension
             }
             else
             {
-                LogDebug("Package root path {0} not found. Nothing to do.", RootPath);
+                _logger.DebugFormat("Package root path '{0}' not found. Nothing to do.", RootPath);
             }
         }
 
@@ -389,19 +400,19 @@ namespace ProGetAzureFileShareExtension
                 }
                 catch (FileNotFoundException ex)
                 {
-                    LogError("{0} not found. {1}", fileName, ex);
+                    _logger.Error(string.Format("Filename '{0}' not found.", fileName), ex);
                     return null;
                 }
                 catch (Exception ex)
                 {
                     lastException = ex;
-                    LogWarning("Unable to open file {0}: {1}", fileName, ex);
+                    _logger.Warn(String.Format("Unable to open file '{0}'", fileName), ex);
                     currentAttempt++;
                 }
 
                 if (currentAttempt < retryCount)
                 {
-                    LogDebug("Failed to open file; will try again after 5 seconds...");
+                    _logger.Debug("Failed to open file; will try again after 5 seconds...");
                     Thread.Sleep(5000);
                 }
 
@@ -411,39 +422,6 @@ namespace ProGetAzureFileShareExtension
                 throw lastException;
             
             return null;
-        }
-
-        /// <summary>
-        /// Temporary logging function, as calling the ProGet SDK provided logging methods (ie, <see cref="Inedo.ProGet.Extensibility.LoggerExtensions.LogDebug(Inedo.ProGet.Extensibility.ILogger,string)"/> and friends) causes a Type Load exception.
-        /// This should be replaced by a real logging framework.
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="args"></param>
-        private void LogDebug(string message, params object[] args)
-        {
-            File.AppendAllText(@"c:\temp\proget-azure-fileshare-extension.log", string.Format(DateTime.Now + "::DEBUG::" + message + "\r\n", args));
-        }
-
-        /// <summary>
-        /// Temporary logging function, as calling the ProGet SDK provided logging methods (ie, <see cref="Inedo.ProGet.Extensibility.LoggerExtensions.LogWarning(Inedo.ProGet.Extensibility.ILogger,string)"/> and friends) causes a Type Load exception.
-        /// This should be replaced by a real logging framework.
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="args"></param>
-        private void LogWarning(string message, params object[] args)
-        {
-            File.AppendAllText(@"c:\temp\proget-azure-fileshare-extension.log", string.Format(DateTime.Now + "::WARN::" + message + "\r\n", args));
-        }
-
-        /// <summary>
-        /// Temporary logging function, as calling the ProGet SDK provided logging methods (ie, <see cref="Inedo.ProGet.Extensibility.LoggerExtensions.LogError(Inedo.ProGet.Extensibility.ILogger,string)"/> and friends) causes a Type Load exception.
-        /// This should be replaced by a real logging framework.
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="args"></param>
-        private void LogError(string message, params object[] args)
-        {
-            File.AppendAllText(@"c:\temp\proget-azure-fileshare-extension.log", string.Format(DateTime.Now + "::ERROR::" + message + "\r\n", args));
         }
     }
 }

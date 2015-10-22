@@ -42,6 +42,10 @@
       <HintPath>..\..\packages\Inedo.ProGet.SDK.3.3.0\lib\net40\InedoLib.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Data.Edm, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Data.Edm.5.6.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
       <Private>True</Private>
@@ -88,6 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AzureFileShareNuGetPackageStore.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="FileShareMapper.cs" />
     <Compile Include="FileSystemOperations.cs" />
     <Compile Include="IFileShareMapper.cs" />
@@ -103,21 +108,13 @@
   <Target Name="BeforeBuild">
   </Target>
   -->
-
-  <Import Project="..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets" Condition="Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')"/>
+  <Import Project="..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets" Condition="Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')" />
   <Target Name="AfterBuild">
     <Message Text="Creating output package $(OutDir)\ProGetAzureFileShareExtension.progetx" />
-
-    <CreateItem Include="$(OutDir)\ProGetAzureFileShareExtension.dll;$(OutDir)\RedDog.Storage.dll;" >
-      <Output ItemName="ZipFiles" TaskParameter="Include"/>
+    <CreateItem Include="$(OutDir)\ProGetAzureFileShareExtension.dll;$(OutDir)\RedDog.Storage.dll;$(OutDir)\log4net.dll;">
+      <Output ItemName="ZipFiles" TaskParameter="Include" />
     </CreateItem>
-
-    <Error Text="Unable to create extension package - please ensure nuget packages are available (looking for existance of '..\..\packages\MSBuildTasks.1.4.0.88')."
-           Condition="!Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')"/>
-
-    <Zip ZipFileName="$(OutDir)\ProGetAzureFileShareExtension.progetx"
-        WorkingDirectory="$(OutDir)"
-        Files="@(ZipFiles)"
-        Condition="Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')"/>
+    <Error Text="Unable to create extension package - please ensure nuget packages are available (looking for existance of '..\..\packages\MSBuildTasks.1.4.0.88')." Condition="!Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')" />
+    <Zip ZipFileName="$(OutDir)\ProGetAzureFileShareExtension.progetx" WorkingDirectory="$(OutDir)" Files="@(ZipFiles)" Condition="Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')" />
   </Target>
 </Project>
