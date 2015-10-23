@@ -6,14 +6,13 @@ This repo contains the source code for a [ProGet](http://inedo.com/proget) exten
 ## How to use:
 1. clone the repo
 2. compile the code
-3. grab the `ProGetAzureFileShareExtension.dll` and `RedDog.Storage.dll` from the bin folder and zip them up
-4. rename the zip file to `ProGetAzureFileShareExtension.progetx`
-5. create a folder on the ProGet server(s) `C:\ProgramData\ProGet\Extensions`
-6. copy the file to the ProGet server(s) to thew new folder
-7. in ProGet -> Administration -> Advanced Settings, change `Core.ExtensionsPath` to `C:\ProgramData\ProGet\Extensions`
-8. restart IIS (or the service, if it is self hosted)
-9. ensure that the account that proget is running under has modify rights to %TEMP%
-10. in ProGet -> Administration -> Manage Feeds -> <feed> -> Package Store -> Change, paste the following
+3. grab the `ProGetAzureFileShareExtension.progetx` file from the output directory
+4. create a folder on the ProGet server(s) `C:\ProgramData\ProGet\Extensions`
+5. copy the file to the ProGet server(s) to thew new folder
+6. in ProGet -> Administration -> Advanced Settings, change `Core.ExtensionsPath` to `C:\ProgramData\ProGet\Extensions`
+7. restart IIS and the ProGet service
+8. ensure that the account that proget is running under has modify rights to %TEMP%
+9. in ProGet -> Administration -> Manage Feeds -> <feed> -> Package Store -> Change, paste the following
 ```
 <ProGetAzureFileShareExtension.AzureFileShareNuGetPackageStore Assembly="ProGetAzureFileShareExtension">
   <Properties RootPath="P:\PackageFolder"
