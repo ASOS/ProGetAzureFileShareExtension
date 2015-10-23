@@ -47,4 +47,5 @@ Therefore, this extension attempts to reconnect the network share before use. Ot
 - [x] Add log statements to useful spots
 - [x] Move sln file to root
 - [x] Log timings around actions
-- [ ] BUG: Feed cleanup crashes for some unknown reason. Probably needs ProGet support involvement.
+- [x] BUG: Feed cleanup crashes for due to proget dll version mismatch. Worked around by adding dll's to lib folder.
+- [ ] Change back to using SDK once new version released by Inedo

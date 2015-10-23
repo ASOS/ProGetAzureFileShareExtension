@@ -34,13 +34,11 @@
       <HintPath>..\..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Inedo.NuGet, Version=12.1.0.0, Culture=neutral, PublicKeyToken=c4cb5218f57bca74, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Inedo.ProGet.SDK.3.3.0\lib\net40\Inedo.NuGet.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Inedo.NuGet">
+      <HintPath>..\..\lib\ProGet.3.8.6\Inedo.NuGet.dll</HintPath>
     </Reference>
-    <Reference Include="InedoLib, Version=152.1.0.0, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Inedo.ProGet.SDK.3.3.0\lib\net40\InedoLib.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="InedoLib">
+      <HintPath>..\..\lib\ProGet.3.8.6\InedoLib.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
@@ -70,9 +68,8 @@
       <HintPath>..\..\packages\Newtonsoft.Json.5.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ProGetCore, Version=3.3.0.26, Culture=neutral, PublicKeyToken=20535527eaf4e568, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Inedo.ProGet.SDK.3.3.0\lib\net40\ProGetCore.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="ProGetCore">
+      <HintPath>..\..\lib\ProGet.3.8.6\ProGetCore.dll</HintPath>
     </Reference>
     <Reference Include="RedDog.Storage, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\RedDog.Storage.0.2.0.0\lib\net40\RedDog.Storage.dll</HintPath>
@@ -109,13 +106,16 @@
   <Target Name="BeforeBuild">
   </Target>
   -->
-  <Import Project="..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets" Condition="Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')" />
+  <PropertyGroup>
+    <MSBuildCommunityTasksPath>$(SolutionDir)packages\MSBuildTasks.1.4.0.88\tools</MSBuildCommunityTasksPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets" Condition="Exists('$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets')" />
   <Target Name="AfterBuild">
     <Message Text="Creating output package $(OutDir)\ProGetAzureFileShareExtension.progetx" />
     <CreateItem Include="$(OutDir)\ProGetAzureFileShareExtension.dll;$(OutDir)\RedDog.Storage.dll;$(OutDir)\log4net.dll;">
       <Output ItemName="ZipFiles" TaskParameter="Include" />
     </CreateItem>
-    <Error Text="Unable to create extension package - please ensure nuget packages are available (looking for existance of '..\..\packages\MSBuildTasks.1.4.0.88')." Condition="!Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')" />
-    <Zip ZipFileName="$(OutDir)\ProGetAzureFileShareExtension.progetx" WorkingDirectory="$(OutDir)" Files="@(ZipFiles)" Condition="Exists('..\..\packages\MSBuildTasks.1.4.0.88\tools\MSBuild.Community.Tasks.Targets')" />
+    <Error Text="Unable to create extension package - please ensure nuget packages are available (looking for existance of '$(MSBuildCommunityTasksPath)')." Condition="!Exists('$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets')" />
+    <Zip ZipFileName="$(OutDir)\ProGetAzureFileShareExtension.progetx" WorkingDirectory="$(OutDir)" Files="@(ZipFiles)" Condition="Exists('$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets')" />
   </Target>
 </Project>
