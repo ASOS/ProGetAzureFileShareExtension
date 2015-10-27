@@ -125,7 +125,7 @@ namespace ProGetAzureFileShareExtension
             }
             catch (Exception ex)
             {
-                _logger.Error(String.Format("Exception occurred mapping drive '{0}' to '{1}' with username '{2}': {3}", DriveLetter, uncPath, UserName), ex);
+                _logger.Error(String.Format("Exception occurred mapping drive '{0}' to '{1}' with username '{2}'", DriveLetter, uncPath, UserName), ex);
                 throw;
             }
         }
@@ -168,12 +168,12 @@ namespace ProGetAzureFileShareExtension
             }
             catch (FileNotFoundException ex)
             {
-                _logger.Error("File not found error looking for package '" + packageId + "', version '" + packageVersion + "'." + ex);
+                _logger.Error("File not found error looking for package '" + packageId + "', version '" + packageVersion + "'.", ex);
                 return null;
             }
             catch (DirectoryNotFoundException ex)
             {
-                _logger.Error("Directory not found error looking for package '" + packageId + "', version '" + packageVersion + "'." + ex);
+                _logger.Error("Directory not found error looking for package '" + packageId + "', version '" + packageVersion + "'.", ex);
                 return null;
             }
         }
@@ -209,7 +209,7 @@ namespace ProGetAzureFileShareExtension
             }
             catch (Exception ex)
             {
-                _logger.Error(String.Format("Error creating package '{0}', version '{1}': {2}", packageId, packageVersion), ex);
+                _logger.Error(String.Format("Error creating package '{0}', version '{1}'.", packageId, packageVersion), ex);
                 throw;
             }
         }
@@ -335,7 +335,7 @@ namespace ProGetAzureFileShareExtension
                                                 }
                                                 catch(Exception ex)
                                                 {
-                                                    _logger.Error("Exception while deleting target file '" + fullExpectedFileName + "': " + ex);
+                                                    _logger.Error("Exception while deleting target file '" + fullExpectedFileName + "'", ex);
                                                 }
                                             }
                                             try
@@ -346,7 +346,7 @@ namespace ProGetAzureFileShareExtension
                                             }
                                             catch (Exception ex)
                                             {
-                                                _logger.Error("Could not rename package: ", ex);
+                                                _logger.Error("Could not rename package.", ex);
                                             }
                                         }
                                     }
@@ -356,7 +356,8 @@ namespace ProGetAzureFileShareExtension
                         catch (Exception ex)
                         {
                             _logger.Error(string.Format("Could not validate '{0}'", fileName), ex);
-                            StoredProcs.Packages_LogIndexingError(FeedId, localFileName, ex.Message, Encoding.UTF8.GetBytes(ex.StackTrace ?? string.Empty)
+                            StoredProcs.PackageIndexingErrors_LogIndexingError(FeedId, localFileName, ex.Message,
+                                Encoding.UTF8.GetBytes(ex.StackTrace ?? string.Empty)
                             ).Execute();
                         }
                     }
