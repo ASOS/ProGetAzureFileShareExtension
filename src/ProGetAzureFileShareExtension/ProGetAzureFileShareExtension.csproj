@@ -111,8 +111,18 @@
   </PropertyGroup>
   <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets" Condition="Exists('$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets')" />
   <Target Name="AfterBuild">
+    <Copy
+      SourceFiles="$(OutDir)\ProGetAzureFileShareExtension.dll"
+      DestinationFiles="$(OutDir)\ProGetAzureFileShareExtension-preilmerge.dll"></Copy>
+    <Delete Files="$(OutDir)\ProGetAzureFileShareExtension"></Delete>
+    <ItemGroup>
+      <inputAssemblies Include="$(OutDir)\ProGetAzureFileShareExtension-preilmerge.dll" />
+      <inputAssemblies Include="$(OutDir)\log4net.dll" />
+      <inputAssemblies Include="$(OutDir)\RedDog.Storage.dll" />
+    </ItemGroup>
+    <ILMerge InputAssemblies="@(inputAssemblies)" OutputFile="$(OutDir)\ProGetAzureFileShareExtension.dll" LogFile="$(OutDir)\ilmergetest.log" />
     <Message Text="Creating output package $(OutDir)\ProGetAzureFileShareExtension.progetx" />
-    <CreateItem Include="$(OutDir)\ProGetAzureFileShareExtension.dll;$(OutDir)\RedDog.Storage.dll;$(OutDir)\log4net.dll;">
+    <CreateItem Include="$(OutDir)\ProGetAzureFileShareExtension.dll;">
       <Output ItemName="ZipFiles" TaskParameter="Include" />
     </CreateItem>
     <Error Text="Unable to create extension package - please ensure nuget packages are available (looking for existance of '$(MSBuildCommunityTasksPath)')." Condition="!Exists('$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets')" />
