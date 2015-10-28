@@ -229,10 +229,10 @@ namespace ProGetAzureFileShareExtension.Tests
             };
             sut.OpenPackage("packageId", SemanticVersion.Parse("1.2.3"));
             fakeFileShareMapper.AssertWasCalled(x => x.Mount(
-                "P:",
-                @"\\username.file.core.windows.net\filesharename",
-                "username",
-                "accesskey",
+                Arg<string>.Is.Equal("P:"),
+                Arg<string>.Is.Equal(@"\\username.file.core.windows.net\filesharename"),
+                Arg<string>.Is.Equal("username"),
+                Arg<string>.Is.Equal("accesskey"),
                 Arg<ILog>.Is.NotNull));
         }
 
@@ -251,10 +251,10 @@ namespace ProGetAzureFileShareExtension.Tests
             };
             sut.CreatePackage("packageId", SemanticVersion.Parse("1.2.3"));
             fakeFileShareMapper.AssertWasCalled(x => x.Mount(
-                "P:",
-                @"\\username.file.core.windows.net\filesharename",
-                "username",
-                "accesskey",
+                Arg<string>.Is.Equal("P:"),
+                Arg<string>.Is.Equal(@"\\username.file.core.windows.net\filesharename"),
+                Arg<string>.Is.Equal("username"),
+                Arg<string>.Is.Equal("accesskey"),
                 Arg<ILog>.Is.NotNull));
         }
 
@@ -274,10 +274,10 @@ namespace ProGetAzureFileShareExtension.Tests
             };
             sut.DeletePackage("packageId", SemanticVersion.Parse("1.2.3"));
             fakeFileShareMapper.AssertWasCalled(x => x.Mount(
-                "P:",
-                @"\\username.file.core.windows.net\filesharename",
-                "username",
-                "accesskey",
+                Arg<string>.Is.Equal("P:"),
+                Arg<string>.Is.Equal(@"\\username.file.core.windows.net\filesharename"),
+                Arg<string>.Is.Equal("username"),
+                Arg<string>.Is.Equal("accesskey"),
                 Arg<ILog>.Is.NotNull));
         }
 
