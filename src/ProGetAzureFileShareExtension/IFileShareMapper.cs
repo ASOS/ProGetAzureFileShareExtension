@@ -1,3 +1,5 @@
+using log4net;
+
 namespace ProGetAzureFileShareExtension
 {
     /// <summary>
@@ -5,6 +7,6 @@ namespace ProGetAzureFileShareExtension
     /// </summary>
     public interface IFileShareMapper
     {
-        void Mount(string driveLetter, string uncPath, string userName, string accessKey);
+        void Mount(string driveLetter, string uncPath, string userName, string accessKey, ILog logger);
     }
 }

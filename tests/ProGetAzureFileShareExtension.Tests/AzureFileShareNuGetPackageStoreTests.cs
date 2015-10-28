@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Inedo.Diagnostics;
 using Inedo.NuGet;
+using log4net;
 using NUnit.Framework;
 using Rhino.Mocks;
 
@@ -230,7 +232,8 @@ namespace ProGetAzureFileShareExtension.Tests
                 "P:",
                 @"\\username.file.core.windows.net\filesharename",
                 "username",
-                "accesskey"));
+                "accesskey",
+                Arg<ILog>.Is.NotNull));
         }
 
         [Test]
@@ -251,7 +254,8 @@ namespace ProGetAzureFileShareExtension.Tests
                 "P:",
                 @"\\username.file.core.windows.net\filesharename",
                 "username",
-                "accesskey"));
+                "accesskey",
+                Arg<ILog>.Is.NotNull));
         }
 
 
@@ -273,7 +277,8 @@ namespace ProGetAzureFileShareExtension.Tests
                 "P:",
                 @"\\username.file.core.windows.net\filesharename",
                 "username",
-                "accesskey"));
+                "accesskey",
+                Arg<ILog>.Is.NotNull));
         }
 
         [Test]

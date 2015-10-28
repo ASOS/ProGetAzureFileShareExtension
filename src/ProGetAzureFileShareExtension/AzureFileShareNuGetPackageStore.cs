@@ -119,7 +119,7 @@ namespace ProGetAzureFileShareExtension
                 _logger.DebugFormat("Mapping network share '{0}' to drive '{1}' with username '{2}'", uncPath, DriveLetter, UserName);
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                _fileShareMapper.Mount(DriveLetter, uncPath, UserName, AccessKey);
+                _fileShareMapper.Mount(DriveLetter, uncPath, UserName, AccessKey, _logger);
                 stopWatch.Stop();
                 _logger.DebugFormat("Drive mapping successful and took {0} milliseconds.", stopWatch.ElapsedMilliseconds);
             }
