@@ -1,7 +1,7 @@
 # ProGet Azure FileShare Package Store Extension
 ---
 
-This repo contains the source code for a [ProGet](http://inedo.com/proget) extension that allows the use of Azure File Shares to store packages.
+This repo contains the source code for a [ProGet](http://inedo.com/proget) 3.x extension that allows the use of Azure File Shares to store packages.
 
 ## How to use:
 1. clone the repo
@@ -36,16 +36,31 @@ Therefore, this extension attempts to reconnect the network share before use. Ot
 ## Useful information
 * [Extending ProGet Package Store Tutorial](http://inedo.com/support/tutorials/extending-proget-package-store)
 
+## Note
+This code is [based](https://github.com/asos/ProGetAzureFileShareExtension/commit/4c0549193c7010b5a1c8567a780a1f13ee9ca530) on the DefaultNuGetPackageStore class graciously provided by Inedo, and change has deliberately been limited to only modifications.
+
+This has been tested against ProGet 3.8.6. It is known not to work against 4.x.
+
 ## todo
 - [ ] Refactor
-- [x] Add tests
-- [x] Add post build task to zip into progetx file
-- [x] Add validation to InitPackageStore()
-- [x] Add proper logging framework
-- [ ] Determine if its possible to inherit from DefaultNugetPackageStore, and call base methods (to insulate against changes)
-- [x] Add missing xmldoc comments
-- [x] Add log statements to useful spots
-- [x] Move sln file to root
-- [x] Log timings around actions
-- [x] BUG: Feed cleanup crashes for due to proget dll version mismatch. Worked around by adding dll's to lib folder.
-- [ ] Change back to using SDK once new version released by Inedo
+- [ ] Determine if its possible to inherit from DefaultNugetPackageStore, and call base methods to insulate against changes
+- [ ] Change back to using SDK (instead of dll's in the lib folder) once new version released by Inedo
+
+## Licence
+
+Copyright 2016 ASOS.com Limited
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+[Portions](https://github.com/asos/ProGetAzureFileShareExtension/commit/4c0549193c7010b5a1c8567a780a1f13ee9ca530) of this code 
+based upon code written and provided by [Inedo](https://inedo.com).
